@@ -1,3 +1,8 @@
+import datetime
+from app import db
+from flask import request, session
+
+
 def check_password(database_password, input_password):
     if database_password == input_password:
         return True
