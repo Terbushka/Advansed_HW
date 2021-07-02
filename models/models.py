@@ -15,6 +15,11 @@ class User(db.Model, Serializer):
         unique=True,
         nullable=False
     )
+    password = db.Column(
+        db.String(64),
+        unique=False,
+        nullable=False
+    )
     email = db.Column(
         db.String(80),
         index=True,
@@ -33,18 +38,32 @@ class User(db.Model, Serializer):
         unique=False,
         nullable=True
     )
-
+    location = db.Column(
+        db.String(40),
+        index=False,
+        unique=False,
+        nullable=False
+    )
     admin = db.Column(
         db.Boolean,
         index=False,
         unique=False,
         nullable=False
     )
-    
     articles = db.relationship("Article", backref='author', lazy=True)
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
+
+    @property
+    def serialize(self):
+        return {
+            "id": self.id,
+            "username": self.username,
+            "email": self.email,
+            'bio': self.bio,
+            'location': self.location
+        }
 
 
 article_categories = db.Table('article_categories',
@@ -53,15 +72,6 @@ article_categories = db.Table('article_categories',
                     )
 
 
-class UserInfo(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    login = db.Column(db.String(100), unique=True, nullable=False)
-    password = db.Column(db.String(100), unique=True, nullable=False)
-
-    def __init__(self, login, password):
-        self.login = login
-        self.password = password
-
 class Article(db.Model):
     __tablename__ = 'articles'
     id = db.Column(
@@ -69,6 +79,7 @@ class Article(db.Model):
         primary_key=True
     )
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    # author = db.relationship("User", backref='articles', lazy=True)
     title = db.Column(
         db.String(255),
         nullable=False,
@@ -92,6 +103,12 @@ class Article(db.Model):
         nullable=True,
         index=False,
         unique=False
+    )
+    location = db.Column(
+        db.String(40),
+        index=False,
+        unique=False,
+        nullable=False
     )
     img = db.Column(
         db.String(255),
